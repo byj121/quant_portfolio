@@ -1,0 +1,9 @@
+akshare>=1.14.0
+pandas>=2.0
+numpy>=1.24
+statsmodels>=0.14
+PyPortfolioOpt>=1.5.5
+streamlit>=1.35
+quantstats>=0.0.62
+plotly>=5.20
+tushare>=1.4.0

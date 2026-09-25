@@ -1,0 +1,41 @@
+# --- 环境变量与密钥 ---
+.env
+.env.*
+*.key
+secrets.toml
+.streamlit/secrets.toml
+
+# --- 本地配置覆盖（如果你想让 config.py 中的资金量等参数不入库，可拆出 local_config.py）---
+local_config.py
+
+# --- 缓存与状态文件 ---
+.cache/
+*.log
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+build/
+dist/
+venv/
+.venv/
+env/
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+
+# --- 数据与报告输出（体积大，不建议入库）---
+*.csv
+data/
+tearsheet.html
+*.parquet
+*.pkl
+
+# --- OS ---
+.DS_Store
+Thumbs.db

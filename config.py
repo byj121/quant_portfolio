@@ -3,6 +3,7 @@
 config.py
 全局配置参数中心。所有模块只读此文件，不允许在其他模块里硬编码参数。
 """
+import os
 from pathlib import Path
 
 # ============ 1. 资金与模式 ============
@@ -146,19 +147,36 @@ CSMAR_CACHE_DIR = CACHE_DIR / "csmar"
 
 # ============ 9. 通知提醒 ============
 # 定时检查脚本(scheduler_check.py)触发调仓时会走这里配置的渠道发通知。
-# 敏感信息（密码/Token）建议放到 .env 文件里用环境变量读取，不要直接写死在这里。
 NOTIFY_METHOD = "email"  # 可选: "email" / "webhook" / "none"
 
+
+def _env(key: str, default: str = "") -> str:
+    """从环境变量或项目根 .env 读取配置项（不依赖 python-dotenv，与 data_loader 同一约定）。
+    敏感信息（邮箱授权码等）只放 .env，不写死进代码。"""
+    val = os.environ.get(key)
+    if val is None:
+        env_path = PROJECT_ROOT / ".env"
+        if env_path.exists():
+            for line in env_path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line.startswith(f"{key}="):
+                    val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    break
+    return (val or default).strip()
+
+
+# 以下敏感信息一律从 .env 读取（见项目根 .env）；
+# 缺失时 notifier 会以 error 级别报出，而不是静默跳过。
 EMAIL_CONFIG = {
-    "smtp_server": "smtp.qq.com",     # 按你的邮箱服务商改，QQ邮箱示例
-    "smtp_port": 465,
-    "sender": "",                      # 发件邮箱
-    "sender_auth_code": "",            # 邮箱的SMTP授权码（不是登录密码），建议用环境变量读取
-    "receiver": "",                    # 接收提醒的邮箱（可以和发件邮箱相同）
+    "smtp_server": _env("EMAIL_SMTP_SERVER", "smtp.qq.com"),  # 按邮箱服务商改，QQ邮箱示例
+    "smtp_port": int(_env("EMAIL_SMTP_PORT", "465") or "465"),
+    "sender": _env("EMAIL_SENDER"),              # 发件邮箱
+    "sender_auth_code": _env("EMAIL_AUTH_CODE"),  # SMTP授权码（不是登录密码）
+    "receiver": _env("EMAIL_RECEIVER"),          # 接收提醒的邮箱（可同发件邮箱）
 }
 
 WEBHOOK_CONFIG = {
-    "url": "",  # 例如 Server酱 / PushPlus / 企业微信机器人 的 webhook 地址
+    "url": _env("WEBHOOK_URL"),  # 例如 Server酱 / PushPlus / 企业微信机器人 的 webhook 地址
 }
 
 # ============ 10. 免责声明 ============

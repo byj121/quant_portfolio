@@ -4,10 +4,8 @@ notifier.py
 职责：调仓触发时发送提醒通知，支持邮件 / webhook 两种渠道。
 配置见 config.py 的 NOTIFY_METHOD / EMAIL_CONFIG / WEBHOOK_CONFIG。
 
-注意：邮箱授权码等敏感信息不建议写死在 config.py 里，
-更安全的做法是用环境变量读取，例如：
-    import os
-    sender_auth_code = os.environ.get("EMAIL_AUTH_CODE", "")
+配置来源：config.EMAIL_CONFIG / config.WEBHOOK_CONFIG —— 两者均由 config._env()
+从项目根 .env 读取，敏感信息不写死在代码里。
 """
 from __future__ import annotations
 import logging
@@ -24,9 +22,13 @@ logger = logging.getLogger("notifier")
 
 def send_email(subject: str, content: str) -> bool:
     cfg = config.EMAIL_CONFIG
-    if not cfg["sender"] or not cfg["sender_auth_code"] or not cfg["receiver"]:
-        logger.warning("邮箱配置不完整，跳过发送。请在 config.EMAIL_CONFIG 中填写 sender / "
-                        "sender_auth_code / receiver")
+    missing = [k for k in ("sender", "sender_auth_code", "receiver") if not cfg.get(k)]
+    if missing:
+        # 这条路径会让"调仓提醒"静默丢失，必须用 error 级别暴露，不能降级成 warning。
+        logger.error("调仓提醒未能发出：EMAIL_CONFIG 缺少 %s。请在项目根 .env 里补上 "
+                     "EMAIL_SENDER / EMAIL_AUTH_CODE / EMAIL_RECEIVER"
+                     "（AUTH_CODE 是邮箱的 SMTP 授权码，不是登录密码）。",
+                     "、".join(missing))
         return False
     try:
         msg = MIMEText(content, "plain", "utf-8")
@@ -53,7 +55,8 @@ def send_webhook(subject: str, content: str) -> bool:
     """
     cfg = config.WEBHOOK_CONFIG
     if not cfg["url"]:
-        logger.warning("Webhook 地址未配置，跳过发送。请在 config.WEBHOOK_CONFIG 中填写 url")
+        logger.error("调仓提醒未能发出：WEBHOOK_CONFIG 缺少 url。"
+                     "请在项目根 .env 里补上 WEBHOOK_URL。")
         return False
     try:
         payload = {"title": subject, "content": content, "text": subject, "desp": content}

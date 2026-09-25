@@ -2,11 +2,17 @@
 """
 factor_engine.py
 职责：
-1. 个股：计算质量(ROIC/FCF)、动量(截面Sharpe/RSRS)、低波动三因子
+1. 个股：纯基本面三因子 —— 质量(近3年平均ROE + 最新销售毛利率)、
+   估值(股息率-10年国债利差 vs PE-TTM历史分位)、安全(资产负债率，越低越好)
 2. ETF：计算趋势强度(RSRS)、量能活跃度、相关性去重三因子
 3. MAD去极值 + Z-Score标准化
 4. OLS 截面回归剥离市值/行业偏误，输出纯净 Alpha 残差
 5. 输出 Top N 候选池
+
+注：compute_cross_sectional_sharpe / compute_low_vol / compute_quality_score
+   是旧「动量 / 低波动 / ROIC 质量」因子体系的遗留函数，**个股打分已不再调用**
+   （当前权重见 config.FACTOR_WEIGHTS_STOCK）。保留在此，供将来若改回
+   动量 / 低波动因子体系时复用。
 """
 from __future__ import annotations
 import logging

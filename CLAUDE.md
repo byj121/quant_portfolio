@@ -48,7 +48,7 @@
 | 用途 | 来源 |
 |---|---|
 | 股票 25 年日行情 + PIT 财报/ST/退市/申万 | CSMAR 原始 xlsx → `csmar_loader` 缓存为 parquet |
-| CSMAR 原始 xlsx 所在目录 | `C:\Users\鲍彦君\Desktop\csmar_data`（`config.CSMAR_DATA_DIR`）|
+| CSMAR 原始 xlsx 所在目录 | 通过环境变量 `CSMAR_DATA_DIR` 配置（默认 `data/csmar_data`，对应 `config.CSMAR_DATA_DIR`） |
 | ETF 行情与分红 | tushare `fund_daily`（磁盘缓存）|
 | 实盘个股基本面 | tushare（`fundamentals.py`）|
 | 实盘行情 | akshare（`data_loader.py`）|

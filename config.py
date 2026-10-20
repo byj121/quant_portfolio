@@ -141,8 +141,8 @@ CACHE_DIR.mkdir(exist_ok=True)
 
 # ============ 8.1 CSMAR 数据 ============
 # 用户从 CSMAR/CNRDS 下载的原始 xlsx 存放目录（含 A股退市日期/A股股利分配/A股特殊处理股票 三个子目录）。
-# 首次读取会解析 xlsx 并转成 parquet 缓存到 CACHE_DIR/csmar/，之后直接读缓存。
-CSMAR_DATA_DIR = Path(r"C:\Users\鲍彦君\Desktop\csmar_data")
+# 可通过 CSMAR_DATA_DIR 环境变量覆盖；首次读取会解析 xlsx 并转成 parquet 缓存到 CACHE_DIR/csmar/。
+CSMAR_DATA_DIR = Path(os.environ.get("CSMAR_DATA_DIR", PROJECT_ROOT / "data" / "csmar_data"))
 CSMAR_CACHE_DIR = CACHE_DIR / "csmar"
 
 # ============ 9. 通知提醒 ============
